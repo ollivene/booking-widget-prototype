@@ -74,7 +74,7 @@
     language: "en",
     theme: {
       primaryColor: "#401196",
-      backgroundColor: "#f4f6fb",
+      backgroundColor: "#ffffff",
       textColor: "#101840",
     },
     layout: {
@@ -613,7 +613,7 @@
         display: flex;
         flex-direction: column;
         gap: 28px;
-        background: transparent;
+        background: var(--provet-bg);
         border: 1px solid rgba(16, 24, 64, 0.1);
         border-radius: 16px;
       }
