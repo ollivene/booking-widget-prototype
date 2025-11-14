@@ -11,9 +11,11 @@
       reasonsTitle: "Select reason for visit",
       reasonsSubtitle: (count) => `${count} ${count === 1 ? "reason" : "reasons"}`,
       stepOneLabel: "Step 1",
-      stepOneTitle: "Select species",
+      stepOneTitle: { line1: "Select", line2: "species" },
       stepTwoLabel: "Step 2",
-      stepTwoTitle: "Select reason",
+      stepTwoTitle: { line1: "Select", line2: "reason" },
+      stepThreeLabel: "Step 3",
+      stepThreeTitle: { line1: "Confirm", line2: "on Provet.com" },
       stepTwoPlaceholder:
         "Choose the species first to see which visits are available for online booking.",
       noReasonsMessage:
@@ -33,9 +35,11 @@
       reasonsTitle: "Valitse käynnin syy",
       reasonsSubtitle: (count) => `${count} ${count === 1 ? "vaihtoehto" : "vaihtoehtoa"}`,
       stepOneLabel: "Vaihe 1",
-      stepOneTitle: "Valitse eläinlaji",
+      stepOneTitle: { line1: "Valitse", line2: "eläinlaji" },
       stepTwoLabel: "Vaihe 2",
-      stepTwoTitle: "Valitse tulosyy",
+      stepTwoTitle: { line1: "Valitse", line2: "tulosyy" },
+      stepThreeLabel: "Vaihe 3",
+      stepThreeTitle: { line1: "Vahvista", line2: "Provet.comissa" },
       stepTwoPlaceholder:
         "Valitse ensin eläinlaji nähdäksesi saatavilla olevat käynnit verkkovaraukseen.",
       noReasonsMessage:
@@ -55,9 +59,11 @@
       reasonsTitle: "Välj besöksorsak",
       reasonsSubtitle: (count) => `${count} ${count === 1 ? "alternativ" : "alternativ"}`,
       stepOneLabel: "Steg 1",
-      stepOneTitle: "Välj djurslag",
+      stepOneTitle: { line1: "Välj", line2: "djurslag" },
       stepTwoLabel: "Steg 2",
-      stepTwoTitle: "Välj besöksorsak",
+      stepTwoTitle: { line1: "Välj", line2: "besöksorsak" },
+      stepThreeLabel: "Steg 3",
+      stepThreeTitle: { line1: "Bekräfta", line2: "på Provet.com" },
       stepTwoPlaceholder:
         "Välj djurslag först för att se vilka besök som kan bokas online.",
       noReasonsMessage:
@@ -91,8 +97,9 @@
       {
         id: "consultation-20",
         species: ["dog", "cat", "rabbit", "other"],
-        title: "Consultation 20 min",
+        title: "Consultation",
         duration: "20 min",
+        price: "45 €",
         category: "Consultation",
         treatment: "76",
         openInNewTab: true,
@@ -100,8 +107,9 @@
       {
         id: "consultation-40",
         species: ["dog", "cat", "rabbit", "other"],
-        title: "Consultation 40 min",
+        title: "Consultation",
         duration: "40 min",
+        price: "82 €",
         category: "Consultation",
         treatment: "77",
         openInNewTab: true,
@@ -109,8 +117,9 @@
       {
         id: "consultation-60",
         species: ["dog", "cat", "rabbit", "other"],
-        title: "Consultation 60 min",
+        title: "Consultation",
         duration: "60 min",
+        price: "115 €",
         category: "Consultation",
         treatment: "78",
         openInNewTab: true,
@@ -118,8 +127,9 @@
       {
         id: "ear-investigation",
         species: ["dog", "cat", "rabbit", "other"],
-        title: "Ear investigation with sedation 40 min",
+        title: "Ear investigation with sedation",
         duration: "40 min",
+        price: "95 €",
         category: "Diagnostics",
         treatment: "68",
         openInNewTab: true,
@@ -127,8 +137,9 @@
       {
         id: "eye-investigation",
         species: ["dog", "cat", "rabbit", "other"],
-        title: "Eye investigation 40 min",
+        title: "Eye investigation",
         duration: "40 min",
+        price: "88 €",
         category: "Diagnostics",
         treatment: "69",
         openInNewTab: true,
@@ -136,8 +147,9 @@
       {
         id: "itching-investigation",
         species: ["dog", "cat", "rabbit", "other"],
-        title: "Itching investigation 40 min",
+        title: "Itching investigation",
         duration: "40 min",
+        price: "92 €",
         category: "Diagnostics",
         treatment: "66",
         openInNewTab: true,
@@ -145,8 +157,9 @@
       {
         id: "health-check-60",
         species: ["dog", "cat", "rabbit", "other"],
-        title: "Health check 60 min",
+        title: "Health check",
         duration: "60 min",
+        price: "105 €",
         category: "Health check",
         treatment: "89",
         openInNewTab: true,
@@ -154,8 +167,9 @@
       {
         id: "recovery-checkup",
         species: ["dog", "cat", "rabbit", "other"],
-        title: "Recovery check-up 40 min",
+        title: "Recovery check-up",
         duration: "40 min",
+        price: "68 €",
         category: "Health check",
         treatment: "92",
         openInNewTab: true,
@@ -180,7 +194,6 @@
       this.speciesSection = null;
       this.reasonsSection = null;
       this.reasonsContainer = null;
-      this.summaryValue = null;
 
       this.build();
     }
@@ -198,6 +211,8 @@
       this.shadowRoot.appendChild(this.wrapper);
 
       this.wrapper.appendChild(this.renderHeaderSection());
+      this.stepIndicator = this.renderStepIndicator();
+      this.wrapper.appendChild(this.stepIndicator);
       this.speciesSection = this.renderSpeciesSection();
       this.wrapper.appendChild(this.speciesSection);
       this.reasonsSection = this.renderReasonsSection();
@@ -208,7 +223,7 @@
       
       this.renderSpeciesCards();
       this.renderReasons();
-      this.updateSelectedSpeciesSummary();
+      this.updateStepIndicator();
       this.syncStepVisibility({ scroll: false });
     }
 
@@ -224,6 +239,89 @@
       });
       header.append(title, subtitle);
       return header;
+    }
+
+    renderStepIndicator() {
+      const container = this.el("div", { class: "step-indicator" });
+      
+      const step1 = this.el("div", { class: "step-indicator__step", dataset: { step: "species" } });
+      const step1Number = this.el("div", { class: "step-indicator__number", text: "1" });
+      const step1Label = this.el("div", { class: "step-indicator__label" });
+      const step1Line1 = this.el("div", { class: "step-indicator__label-line", text: this.config.copy.stepOneTitle.line1 });
+      const step1Line2 = this.el("div", { class: "step-indicator__label-line step-indicator__label-line--bold", text: this.config.copy.stepOneTitle.line2 });
+      step1Label.append(step1Line1, step1Line2);
+      step1.append(step1Number, step1Label);
+      
+      step1.addEventListener("click", () => {
+        if (this.state.selectedSpeciesId) {
+          this.state.currentStep = "species";
+          this.syncStepVisibility();
+          this.updateStepIndicator();
+        }
+      });
+      
+      const divider1 = this.el("div", { class: "step-indicator__divider" });
+      
+      const step2 = this.el("div", { class: "step-indicator__step", dataset: { step: "reasons" } });
+      const step2Number = this.el("div", { class: "step-indicator__number", text: "2" });
+      const step2Label = this.el("div", { class: "step-indicator__label" });
+      const step2Line1 = this.el("div", { class: "step-indicator__label-line", text: this.config.copy.stepTwoTitle.line1 });
+      const step2Line2 = this.el("div", { class: "step-indicator__label-line step-indicator__label-line--bold", text: this.config.copy.stepTwoTitle.line2 });
+      step2Label.append(step2Line1, step2Line2);
+      step2.append(step2Number, step2Label);
+      
+      step2.addEventListener("click", () => {
+        if (this.state.selectedSpeciesId && this.state.currentStep === "confirm") {
+          this.state.currentStep = "reasons";
+          this.syncStepVisibility();
+          this.updateStepIndicator();
+        }
+      });
+      
+      const divider2 = this.el("div", { class: "step-indicator__divider" });
+      
+      const step3 = this.el("div", { class: "step-indicator__step", dataset: { step: "confirm" } });
+      const step3Number = this.el("div", { class: "step-indicator__number", text: "3" });
+      const step3Label = this.el("div", { class: "step-indicator__label" });
+      const step3Line1 = this.el("div", { class: "step-indicator__label-line", text: this.config.copy.stepThreeTitle.line1 });
+      const step3Line2 = this.el("div", { class: "step-indicator__label-line step-indicator__label-line--bold", text: this.config.copy.stepThreeTitle.line2 });
+      step3Label.append(step3Line1, step3Line2);
+      step3.append(step3Number, step3Label);
+      
+      container.append(step1, divider1, step2, divider2, step3);
+      return container;
+    }
+
+    updateStepIndicator() {
+      if (!this.stepIndicator) return;
+      
+      const steps = this.stepIndicator.querySelectorAll(".step-indicator__step");
+      steps.forEach((step) => {
+        const stepType = step.dataset.step;
+        const isActive = this.state.currentStep === stepType;
+        
+        // Determine if step is completed
+        let isCompleted = false;
+        if (stepType === "species" && this.state.selectedSpeciesId && (this.state.currentStep === "reasons" || this.state.currentStep === "confirm")) {
+          isCompleted = true;
+        }
+        if (stepType === "reasons" && this.state.currentStep === "confirm") {
+          isCompleted = true;
+        }
+        
+        // Determine if step is clickable
+        let isClickable = false;
+        if (stepType === "species" && this.state.selectedSpeciesId) {
+          isClickable = true;
+        }
+        if (stepType === "reasons" && this.state.selectedSpeciesId && this.state.currentStep === "confirm") {
+          isClickable = true;
+        }
+        
+        step.classList.toggle("is-active", isActive);
+        step.classList.toggle("is-completed", isCompleted);
+        step.classList.toggle("is-clickable", isClickable);
+      });
     }
 
     el(tag, { class: className, text, dataset, attrs } = {}) {
@@ -252,13 +350,6 @@
         class: "booking-widget__section",
         dataset: { section: "species" },
       });
-
-      section.appendChild(
-        buildStepHeader(this.el.bind(this), {
-          stepLabel: this.config.copy.stepOneLabel,
-          title: this.config.copy.stepOneTitle,
-        })
-      );
 
       this.speciesList = this.el("div", { class: "species-list" });
       section.appendChild(this.speciesList);
@@ -294,40 +385,9 @@
         dataset: { section: "reasons" },
       });
 
-      const summary = this.el("div", { class: "step-summary" });
-      const summaryInfo = this.el("div", { class: "step-summary__info" });
-
-      summaryInfo.append(
-        this.el("span", {
-          class: "step-summary__label",
-          text: this.config.copy.selectedSpeciesLabel,
-        })
-      );
-      this.summaryValue = this.el("span", { class: "step-summary__value", text: "—" });
-      summaryInfo.append(this.summaryValue);
-
-      const changeButton = this.el("button", {
-        class: "step-summary__action",
-        text: this.config.copy.backToSpeciesLabel,
-      });
-      changeButton.addEventListener("click", () => {
-        this.state.currentStep = "species";
-        this.refreshSpeciesSelection();
-        this.syncStepVisibility();
-      });
-
-      summary.append(summaryInfo, changeButton);
-
-      const header = this.el("div", { class: "reasons-section__header" });
-      const title = this.el("h2", {
-        class: "reasons-section__title",
-        text: this.config.copy.reasonsTitle,
-      });
-      header.appendChild(title);
-
       this.reasonsContainer = this.el("div", { class: "reasons-section__categories" });
 
-      section.append(summary, header, this.reasonsContainer);
+      section.appendChild(this.reasonsContainer);
 
       return section;
     }
@@ -365,7 +425,7 @@
         this.state.currentStep = "reasons";
         this.renderReasons();
         this.refreshSpeciesSelection();
-        this.updateSelectedSpeciesSummary();
+        this.updateStepIndicator();
         this.syncStepVisibility();
         dispatchHostEvent(this.host, "species-selected", {
           speciesId: species.id,
@@ -479,8 +539,19 @@
       
       const info = this.el("div", { class: "reason-card__info" });
       const name = this.el("div", { class: "reason-card__name", text: reason.title });
-      const duration = this.el("span", { class: "reason-card__duration", text: reason.duration });
-      info.append(name, duration);
+      
+      const metaRow = this.el("div", { class: "reason-card__meta" });
+      
+      const duration = this.el("span", { class: "reason-card__duration" });
+      duration.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-right: 6px;"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M8 4v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>${reason.duration}`;
+      metaRow.appendChild(duration);
+      
+      if (reason.price) {
+        const price = this.el("span", { class: "reason-card__price", text: reason.price });
+        metaRow.appendChild(price);
+      }
+      
+      info.append(name, metaRow);
       
       const actionButton = this.el("button", {
         class: "reason-card__action",
@@ -490,12 +561,21 @@
 
       const handleNavigate = () => {
         const bookingUrl = reason.bookingUrl || this.config.bookingUrl;
+        
+        // Update step indicator to step 3
+        this.state.currentStep = "confirm";
+        this.updateStepIndicator();
+        
         dispatchHostEvent(this.host, "reason-selected", {
           speciesId: this.state.selectedSpeciesId,
           reasonId: reason.id,
           bookingUrl,
         });
-        this.navigateToBooking(reason);
+        
+        // Small delay to show step 3 before navigating
+        setTimeout(() => {
+          this.navigateToBooking(reason);
+        }, 300);
       };
 
       actionButton.addEventListener("click", (event) => {
@@ -512,14 +592,6 @@
       const wrapper = this.el("div", { class: "placeholder-card" });
       wrapper.appendChild(this.el("p", { class: "placeholder-card__text", text }));
       return wrapper;
-    }
-
-    updateSelectedSpeciesSummary() {
-      if (!this.summaryValue) return;
-      const species = this.config.species.find(
-        (item) => item.id === this.state.selectedSpeciesId
-      );
-      this.summaryValue.textContent = species ? species.label : "—";
     }
 
     syncStepVisibility({ scroll = true } = {}) {
@@ -559,14 +631,6 @@
 
       window.location.href = bookingUrl;
     }
-  }
-
-  function buildStepHeader(createElement, { stepLabel, title }) {
-    const container = createElement("div", { class: "step-header" });
-    container.append(
-      createElement("h3", { class: "step-header__title", text: title })
-    );
-    return container;
   }
 
   function sanitizeColor(value, fallback) {
@@ -639,6 +703,89 @@
         color: var(--provet-text-secondary);
       }
 
+      .step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 28px;
+        background: rgba(16, 24, 64, 0.02);
+        border-radius: 16px;
+        border: 1px solid rgba(16, 24, 64, 0.08);
+      }
+
+      .step-indicator__step {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+        opacity: 0.4;
+        transition: opacity 200ms ease;
+      }
+
+      .step-indicator__step.is-active {
+        opacity: 1;
+      }
+
+      .step-indicator__step.is-completed {
+        opacity: 0.7;
+      }
+
+      .step-indicator__step.is-clickable {
+        cursor: pointer;
+      }
+
+      .step-indicator__step.is-clickable:hover {
+        opacity: 0.9;
+      }
+
+      .step-indicator__number {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(16, 24, 64, 0.08);
+        color: var(--provet-text-secondary);
+        font-size: 15px;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+
+      .step-indicator__step.is-active .step-indicator__number {
+        background: var(--provet-primary);
+        color: var(--provet-primary-contrast);
+      }
+
+      .step-indicator__step.is-completed .step-indicator__number {
+        background: rgba(64, 17, 150, 0.15);
+        color: var(--provet-primary);
+      }
+
+      .step-indicator__label {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        line-height: 1.2;
+      }
+
+      .step-indicator__label-line {
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--provet-text-primary);
+      }
+
+      .step-indicator__label-line--bold {
+        font-weight: 700;
+      }
+
+      .step-indicator__divider {
+        width: 40px;
+        height: 2px;
+        background: rgba(16, 24, 64, 0.1);
+        flex-shrink: 0;
+      }
+
       .booking-widget__section {
         background: transparent;
         border-radius: var(--provet-radius-lg);
@@ -651,33 +798,6 @@
 
       .booking-widget__section.is-hidden {
         display: none;
-      }
-
-      .step-header {
-        display: flex;
-        align-items: baseline;
-        gap: 12px;
-      }
-
-      .step-header__badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(64, 17, 150, 0.12);
-        color: var(--provet-primary);
-        font-weight: 600;
-        font-size: 13px;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        padding: 6px 12px;
-        border-radius: 999px;
-      }
-
-      .step-header__title {
-        margin: 0;
-        font-size: 26px;
-        font-weight: 600;
-        color: var(--provet-text-primary);
       }
 
       .species-list {
@@ -695,7 +815,7 @@
         min-height: 96px;
         border: 1px solid rgba(16, 24, 64, 0.08);
         background: var(--provet-card-bg);
-        border-radius: 20px;
+        border-radius: 16px;
         transition: transform 140ms ease, border-color 140ms ease;
       }
 
@@ -770,74 +890,6 @@
         border-color: var(--provet-primary);
       }
 
-      .reasons-section__header {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        padding-top: 32px;
-        margin-bottom: 4px;
-      }
-
-      .reasons-section__title {
-        margin: 0;
-        font-size: 26px;
-        font-weight: 600;
-        color: var(--provet-text-primary);
-      }
-
-      .reasons-section__subtitle {
-        margin: 0;
-        font-size: 16px;
-        color: var(--provet-text-secondary);
-      }
-
-      .step-summary {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 18px;
-        padding: 22px 24px;
-        border-radius: var(--provet-radius-lg);
-        border: 1px solid var(--provet-border);
-        background: rgba(90, 50, 255, 0.05);
-      }
-
-      .step-summary__info {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-
-      .step-summary__label {
-        font-size: 13px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--provet-text-secondary);
-      }
-
-      .step-summary__value {
-        font-size: 17px;
-        font-weight: 600;
-        color: var(--provet-text-primary);
-      }
-
-      .step-summary__action {
-        padding: 10px 20px;
-        border-radius: 999px;
-        border: 1px solid rgba(64, 17, 150, 0.2);
-        background: rgba(64, 17, 150, 0.1);
-        color: var(--provet-primary);
-        font-weight: 600;
-        cursor: pointer;
-        transition: transform 120ms ease, border-color 120ms ease;
-      }
-
-      .step-summary__action:hover {
-        transform: translateY(-1px);
-        border-color: rgba(64, 17, 150, 0.45);
-      }
-
       .category {
         margin-bottom: 24px;
       }
@@ -908,7 +960,7 @@
         min-height: 88px;
         border: 1px solid rgba(16, 24, 64, 0.08);
         background: var(--provet-card-bg);
-        border-radius: 20px;
+        border-radius: 16px;
         margin-bottom: 12px;
         transition: transform 140ms ease, border-color 140ms ease;
       }
@@ -921,7 +973,7 @@
       .reason-card__info {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 12px;
       }
 
       .reason-card__name {
@@ -930,16 +982,37 @@
         color: var(--provet-text-primary);
       }
 
+      .reason-card__meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
       .reason-card__duration {
         display: inline-flex;
         align-items: center;
         width: fit-content;
         font-size: 14px;
         font-weight: 600;
-        color: var(--provet-primary);
+        color: var(--provet-text-primary);
         padding: 6px 12px;
         border-radius: 999px;
-        background: rgba(64, 17, 150, 0.1);
+        background: #ffffff;
+        border: 1px solid rgba(16, 24, 64, 0.15);
+      }
+
+      .reason-card__price {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--provet-text-primary);
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: #ffffff;
+        border: 1px solid rgba(16, 24, 64, 0.15);
       }
 
       .reason-card__action {
@@ -1005,15 +1078,27 @@
           font-size: 30px;
         }
 
-        .step-summary {
-          flex-direction: column;
-          align-items: stretch;
-          gap: 16px;
+        .step-indicator {
+          padding: 18px 20px;
+          gap: 12px;
         }
 
-        .step-summary__action {
-          width: 100%;
-          text-align: center;
+        .step-indicator__step {
+          gap: 8px;
+        }
+
+        .step-indicator__number {
+          width: 28px;
+          height: 28px;
+          font-size: 14px;
+        }
+
+        .step-indicator__label-line {
+          font-size: 13px;
+        }
+
+        .step-indicator__divider {
+          width: 24px;
         }
       }
     `;
